@@ -59,11 +59,14 @@ export async function checkAndAwardAchievements(
 
   let bonusXP = 0
   for (const ach of achievementRecords) {
-    await prisma.userAchievement.createMany({
-      data: [{ userId, achievementId: ach.id }],
-      skipDuplicates: true,
-    })
-    bonusXP += ach.xpReward
+    try {
+      await prisma.userAchievement.create({
+        data: { userId, achievementId: ach.id },
+      })
+      bonusXP += ach.xpReward
+    } catch {
+      // already earned
+    }
   }
 
   if (bonusXP > 0) {
