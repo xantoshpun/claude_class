@@ -1,0 +1,76 @@
+# Files API
+
+The Files API lets you upload files once and reference them across multiple requests. Instead of sending a large PDF with every message, upload it once and use the file ID.
+
+## Supported File Types
+
+- PDF documents
+- Plain text files
+- Images (JPEG, PNG, GIF, WebP)
+- CSV and other data files
+
+## Uploading a File
+
+```python
+import anthropic
+
+client = anthropic.Anthropic()
+
+# Upload a file
+with open("research_paper.pdf", "rb") as f:
+    file_response = client.beta.files.upload(
+        file=("research_paper.pdf", f, "application/pdf")
+    )
+
+file_id = file_response.id
+print(f"File uploaded: {file_id}")
+```
+
+## Using an Uploaded File
+
+```python
+response = client.messages.create(
+    model="claude-opus-4-5",
+    max_tokens=2048,
+    messages=[{
+        "role": "user",
+        "content": [
+            {
+                "type": "document",
+                "source": {
+                    "type": "file",
+                    "file_id": file_id
+                }
+            },
+            {
+                "type": "text",
+                "text": "Summarize the key findings of this paper."
+            }
+        ]
+    }]
+)
+```
+
+## Listing and Deleting Files
+
+```python
+# List all uploaded files
+files = client.beta.files.list()
+for f in files.data:
+    print(f.id, f.filename, f.created_at)
+
+# Delete a file
+client.beta.files.delete(file_id)
+```
+
+## Benefits of the Files API
+
+- **Efficiency** — Upload once, reference many times
+- **Cost savings** — No need to re-send large files on each request
+- **Simpler code** — Reference files by ID instead of base64 encoding
+
+## Key Takeaways
+
+- Upload files once with `client.beta.files.upload()`
+- Reference them by file ID in subsequent messages
+- Supports PDFs, text, images, and other document types

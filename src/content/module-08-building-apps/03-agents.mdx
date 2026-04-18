@@ -1,0 +1,88 @@
+# Building Agents with Claude
+
+Agents go beyond single Q&A exchanges — they autonomously plan, take actions, observe results, and continue until they complete a goal. Claude is an excellent agent backbone.
+
+## What is an Agent?
+
+An agent is a system where Claude:
+1. Receives a high-level goal
+2. Plans steps to achieve it
+3. Uses tools to execute each step
+4. Observes results and adapts
+5. Continues until the goal is met
+
+## Minimal Agent Implementation
+
+```python
+import anthropic
+
+client = anthropic.Anthropic()
+
+def run_agent(goal: str, tools: list, max_steps: int = 10) -> str:
+    messages = [{"role": "user", "content": goal}]
+    
+    for step in range(max_steps):
+        response = client.messages.create(
+            model="claude-opus-4-5",
+            max_tokens=4096,
+            tools=tools,
+            messages=messages
+        )
+        
+        messages.append({"role": "assistant", "content": response.content})
+        
+        if response.stop_reason == "end_turn":
+            # Extract final text response
+            for block in response.content:
+                if hasattr(block, 'text'):
+                    return block.text
+            return "Done"
+        
+        # Execute tool calls
+        tool_results = []
+        for block in response.content:
+            if block.type == "tool_use":
+                result = execute_tool(block.name, block.input)
+                tool_results.append({
+                    "type": "tool_result",
+                    "tool_use_id": block.id,
+                    "content": str(result)
+                })
+        
+        messages.append({"role": "user", "content": tool_results})
+    
+    return "Max steps reached"
+```
+
+## Agent Design Principles
+
+### Keep Tools Atomic
+Each tool does one thing well. Don't build a god-function tool.
+
+### Limit Scope
+Set a maximum number of steps to prevent infinite loops.
+
+### Log Everything
+Record every tool call and result for debugging and auditing.
+
+### Fail Gracefully
+Agents should handle tool failures without crashing.
+
+## Multi-Agent Systems
+
+For complex tasks, use multiple specialized agents:
+- **Orchestrator**: Plans and delegates
+- **Research Agent**: Web search, document retrieval
+- **Coder Agent**: Write and execute code
+- **Reviewer Agent**: Check outputs for quality
+
+## Claude Code — An Example Agent
+
+Claude Code (the tool you're using right now) is an agent: it reads files, writes code, runs tests, and iterates until the task is complete.
+
+## Key Takeaways
+
+- Agents use tool use + an agentic loop to complete multi-step goals
+- Keep tools atomic and set step limits
+- Log all agent actions for auditability
+- Multi-agent systems handle complex, parallelizable tasks

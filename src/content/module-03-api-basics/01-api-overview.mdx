@@ -1,0 +1,71 @@
+# Claude API Overview
+
+The Anthropic API gives you programmatic access to Claude models. You can integrate Claude into any application — a web app, mobile app, CLI tool, or automated pipeline.
+
+## What the API Provides
+
+- **Messages API** — Send conversational messages and get responses
+- **Streaming** — Get tokens as they're generated for real-time UX
+- **Tool use** — Enable Claude to call functions and use external APIs
+- **Vision** — Send images alongside text
+- **Files API** — Upload and reference files in conversations
+
+## API Architecture
+
+The API is a simple REST API with a single primary endpoint:
+
+```
+POST https://api.anthropic.com/v1/messages
+```
+
+Every request includes:
+- Your **API key** for authentication
+- The **model** to use
+- The **messages** array (your conversation)
+- Configuration like `max_tokens` and `temperature`
+
+## Response Structure
+
+```json
+{
+  "id": "msg_01XFDUDYJgAACzvnptvVoYEL",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {
+      "type": "text",
+      "text": "Hello! How can I help you today?"
+    }
+  ],
+  "model": "claude-opus-4-5",
+  "stop_reason": "end_turn",
+  "usage": {
+    "input_tokens": 10,
+    "output_tokens": 12
+  }
+}
+```
+
+## SDKs Available
+
+Anthropic provides official SDKs for:
+- **Python** — `pip install anthropic`
+- **TypeScript/Node.js** — `npm install @anthropic-ai/sdk`
+
+Community SDKs also exist for Java, Go, Ruby, and more.
+
+## Versioning
+
+The API uses a version header to ensure backward compatibility:
+
+```
+anthropic-version: 2023-06-01
+```
+
+SDKs handle this automatically.
+
+## Key Takeaways
+
+- The Anthropic API is a REST API centered around the Messages endpoint
+- Official SDKs exist for Python and TypeScript
+- Responses include token usage, stop reason, and content blocks

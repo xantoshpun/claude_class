@@ -1,0 +1,82 @@
+# Handling Tool Results
+
+After Claude requests a tool call, you execute the function and return the result back to Claude. Claude then uses that result to formulate its final response.
+
+## The Complete Flow
+
+```python
+import anthropic
+import json
+
+client = anthropic.Anthropic()
+
+# Step 1: Send initial message with tools
+response = client.messages.create(
+    model="claude-opus-4-5",
+    max_tokens=1024,
+    tools=[weather_tool],
+    messages=[{"role": "user", "content": "Weather in London?"}]
+)
+
+# Step 2: Check if tool was called
+if response.stop_reason == "tool_use":
+    tool_use = next(b for b in response.content if b.type == "tool_use")
+    
+    # Step 3: Execute the actual function
+    result = get_weather(tool_use.input["location"])
+    
+    # Step 4: Return result to Claude
+    final_response = client.messages.create(
+        model="claude-opus-4-5",
+        max_tokens=1024,
+        tools=[weather_tool],
+        messages=[
+            {"role": "user", "content": "Weather in London?"},
+            {"role": "assistant", "content": response.content},
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": tool_use.id,
+                        "content": json.dumps(result)
+                    }
+                ]
+            }
+        ]
+    )
+    print(final_response.content[0].text)
+```
+
+## Tool Result Format
+
+Tool results go back as a `user` message with type `tool_result`:
+
+```python
+{
+    "type": "tool_result",
+    "tool_use_id": "toolu_abc123",  # must match the tool_use id
+    "content": "The result as a string or structured data"
+}
+```
+
+## Handling Errors
+
+If your tool fails, return an error result:
+
+```python
+{
+    "type": "tool_result",
+    "tool_use_id": tool_use.id,
+    "content": "Error: Location not found",
+    "is_error": True
+}
+```
+
+Claude will acknowledge the error and either try again or explain to the user.
+
+## Key Takeaways
+
+- After Claude calls a tool, you execute it and return results as a `tool_result` message
+- Always include the matching `tool_use_id` in your result
+- Use `is_error: true` to signal failures back to Claude

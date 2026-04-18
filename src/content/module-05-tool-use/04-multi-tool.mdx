@@ -1,0 +1,78 @@
+# Multi-Tool Flows
+
+Claude can use multiple tools in sequence — calling one tool, analyzing the result, then calling another. This enables complex, multi-step automation workflows.
+
+## Sequential Tool Use
+
+Claude might use tools in sequence:
+1. Call `search_web("latest iPhone specs")`
+2. Get results
+3. Call `get_price("iPhone 16 Pro")` 
+4. Combine both results into a final answer
+
+## Parallel Tool Use
+
+Claude can also call multiple tools simultaneously when they're independent:
+
+```python
+# Claude might return multiple tool_use blocks at once
+[
+  {"type": "tool_use", "id": "tu_1", "name": "get_weather", "input": {"location": "NYC"}},
+  {"type": "tool_use", "id": "tu_2", "name": "get_weather", "input": {"location": "LA"}},
+]
+```
+
+Handle parallel calls by collecting all results before returning:
+
+```python
+if response.stop_reason == "tool_use":
+    tool_calls = [b for b in response.content if b.type == "tool_use"]
+    
+    # Execute all in parallel (e.g., with asyncio or ThreadPoolExecutor)
+    results = [execute_tool(tc) for tc in tool_calls]
+    
+    tool_results = [
+        {"type": "tool_result", "tool_use_id": tc.id, "content": str(r)}
+        for tc, r in zip(tool_calls, results)
+    ]
+```
+
+## Building an Agentic Loop
+
+For complex workflows, use a loop that continues until Claude stops calling tools:
+
+```python
+messages = [{"role": "user", "content": user_input}]
+
+while True:
+    response = client.messages.create(
+        model="claude-opus-4-5",
+        max_tokens=4096,
+        tools=all_tools,
+        messages=messages
+    )
+    
+    messages.append({"role": "assistant", "content": response.content})
+    
+    if response.stop_reason == "end_turn":
+        break  # Claude is done
+    
+    # Process tool calls and add results
+    tool_results = []
+    for block in response.content:
+        if block.type == "tool_use":
+            result = execute_tool(block.name, block.input)
+            tool_results.append({
+                "type": "tool_result",
+                "tool_use_id": block.id,
+                "content": str(result)
+            })
+    
+    messages.append({"role": "user", "content": tool_results})
+```
+
+## Key Takeaways
+
+- Claude can call tools sequentially or in parallel
+- Use an agentic loop to let Claude decide when it's done
+- Always add both tool calls and tool results to the message history

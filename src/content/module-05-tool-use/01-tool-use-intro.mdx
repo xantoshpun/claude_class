@@ -1,0 +1,44 @@
+# Introduction to Tool Use
+
+Tool use (also called "function calling") lets Claude interact with the external world — calling APIs, querying databases, running calculations, and more. Instead of Claude guessing an answer, it can fetch real data.
+
+## How Tool Use Works
+
+1. You define tools (functions) Claude can use
+2. Claude reads your tools and decides if/when to call them
+3. Claude sends a tool call request (not actual execution — you run the code)
+4. You execute the function and return results
+5. Claude reads the result and continues the conversation
+
+## Why Tool Use Matters
+
+Without tool use, Claude's knowledge is frozen at its training cutoff. With tools, Claude can:
+- Get real-time data (weather, stock prices, news)
+- Query your database
+- Send emails or Slack messages
+- Run code and return results
+- Search the web
+
+## The Tool Use Flow
+
+```
+User asks → Claude decides to use tool → Returns tool call →
+You execute → Return result → Claude formulates final answer
+```
+
+## A Simple Example
+
+Imagine you give Claude a `get_weather` tool. When a user asks "What's the weather in Paris?", Claude doesn't guess — it calls `get_weather(location="Paris")`, gets the real current data, and tells the user.
+
+## Key Concepts
+
+- **Tools are schemas** — you define the function name, parameters, and descriptions
+- **Claude decides** — it chooses if and when to call tools
+- **You execute** — Claude never directly runs code; it asks you to
+- **Results go back** — you feed tool results back in the conversation
+
+## Key Takeaways
+
+- Tool use lets Claude access real-time external data and systems
+- Claude requests tool calls; your code executes them
+- This is the foundation of AI agents and automation

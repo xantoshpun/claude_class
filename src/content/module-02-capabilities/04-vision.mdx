@@ -1,0 +1,87 @@
+# Vision & Images with Claude
+
+Claude is multimodal — it can see and understand images alongside text. This opens up powerful new workflows that weren't possible with text-only models.
+
+## What Claude Can Do with Images
+
+### Describe & Understand
+Claude can describe what's in an image, identifying objects, scenes, text, and context.
+
+### Read Text in Images (OCR)
+Extract text from screenshots, photos of documents, whiteboards, or handwritten notes.
+
+### Analyze Charts & Graphs
+Interpret data visualizations and describe trends, outliers, and key statistics.
+
+### Code from Screenshots
+Convert UI screenshots into HTML/CSS code, or explain UI components from a design mockup.
+
+### Document Processing
+Process photos of forms, receipts, invoices, or contracts and extract structured data.
+
+## Supported Image Formats
+
+- JPEG / JPG
+- PNG
+- GIF (static, not animated)
+- WebP
+
+## How to Send Images (API)
+
+```python
+import anthropic
+import base64
+
+client = anthropic.Anthropic()
+
+with open("image.jpg", "rb") as f:
+    image_data = base64.standard_b64encode(f.read()).decode("utf-8")
+
+message = client.messages.create(
+    model="claude-opus-4-5",
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": "image/jpeg",
+                        "data": image_data,
+                    },
+                },
+                {
+                    "type": "text",
+                    "text": "What is in this image? Describe in detail."
+                }
+            ],
+        }
+    ],
+)
+print(message.content[0].text)
+```
+
+## Use Cases by Industry
+
+| Industry | Vision Use Case |
+|---|---|
+| Healthcare | Analyze medical imaging reports |
+| Legal | Extract text from scanned contracts |
+| Retail | Catalog product images |
+| Finance | Process receipts and invoices |
+| Education | Grade handwritten assignments |
+| Engineering | Review architecture diagrams |
+
+## Limitations
+
+- Claude cannot generate or edit images (it only reads them)
+- Very small text in images may not be accurately read
+- Animated GIFs are treated as static (first frame only)
+
+## Key Takeaways
+
+- Claude can understand, describe, and extract information from images
+- Supported formats: JPEG, PNG, GIF, WebP
+- Common uses: OCR, chart analysis, UI-to-code, document processing

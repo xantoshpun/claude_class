@@ -1,0 +1,74 @@
+# RAG with Claude
+
+Retrieval-Augmented Generation (RAG) combines Claude's language capabilities with your own data. Instead of asking Claude to know everything, you retrieve the relevant information and provide it in context.
+
+## Why RAG?
+
+- Claude's knowledge has a training cutoff
+- Claude doesn't know your private/proprietary data
+- Grounding Claude in your docs reduces hallucination
+
+## RAG Architecture
+
+```
+1. Ingest: chunk documents → embed → store in vector DB
+2. Query: embed user question → find similar chunks → retrieve top-k
+3. Generate: send question + retrieved chunks → Claude → answer
+```
+
+## Simple RAG Implementation
+
+```python
+import anthropic
+# Assume you have a vector_search function
+
+client = anthropic.Anthropic()
+
+def rag_answer(user_question: str, vector_db) -> str:
+    # Step 1: Retrieve relevant chunks
+    chunks = vector_db.search(user_question, top_k=5)
+    context = "\n\n".join([c.text for c in chunks])
+    
+    # Step 2: Generate with context
+    response = client.messages.create(
+        model="claude-opus-4-5",
+        max_tokens=1024,
+        system="""You answer questions based only on the provided context.
+If the answer isn't in the context, say so clearly.
+Never make up information not in the context.""",
+        messages=[{
+            "role": "user",
+            "content": f"""<context>
+{context}
+</context>
+
+<question>
+{user_question}
+</question>"""
+        }]
+    )
+    return response.content[0].text
+```
+
+## Key RAG Tips
+
+1. **Chunk size matters** — 200-500 tokens per chunk is usually optimal
+2. **Overlap chunks** — Use 10-20% overlap to avoid cutting context mid-sentence
+3. **Metadata matters** — Store source, date, page number alongside embeddings
+4. **Cite sources** — Ask Claude to cite which part of the context it used
+
+## Popular Vector DBs
+
+| Database | Best For |
+|---|---|
+| Pinecone | Managed, production-scale |
+| Weaviate | Open source, schema-driven |
+| pgvector | Already using PostgreSQL |
+| ChromaDB | Local development, prototyping |
+| Qdrant | High performance, Rust-based |
+
+## Key Takeaways
+
+- RAG grounds Claude in your private/current data
+- The pattern: embed → store → retrieve → generate
+- Chunk size, overlap, and metadata quality are critical

@@ -1,0 +1,74 @@
+# Defining Tools
+
+To use tools, you provide Claude with a JSON schema describing what each tool does and what parameters it accepts. Claude uses this schema to decide when and how to call the tool.
+
+## Tool Schema Structure
+
+```python
+tools = [
+    {
+        "name": "get_weather",
+        "description": "Get the current weather for a location. Use this when the user asks about weather conditions.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "description": "City and country, e.g. 'London, UK'"
+                },
+                "unit": {
+                    "type": "string",
+                    "enum": ["celsius", "fahrenheit"],
+                    "description": "Temperature unit"
+                }
+            },
+            "required": ["location"]
+        }
+    }
+]
+```
+
+## Sending Tools to Claude
+
+```python
+import anthropic
+
+client = anthropic.Anthropic()
+
+response = client.messages.create(
+    model="claude-opus-4-5",
+    max_tokens=1024,
+    tools=tools,
+    messages=[
+        {"role": "user", "content": "What's the weather like in Tokyo?"}
+    ]
+)
+
+# Check if Claude wants to call a tool
+if response.stop_reason == "tool_use":
+    tool_call = response.content[0]
+    print(f"Tool: {tool_call.name}")
+    print(f"Input: {tool_call.input}")
+```
+
+## Writing Good Tool Descriptions
+
+The description is what Claude uses to decide *when* to call a tool. Be specific:
+
+❌ Bad: `"description": "Gets data"`
+
+✅ Good: `"description": "Retrieves the current stock price for a given ticker symbol. Only use this for publicly traded companies. Returns price in USD."`
+
+## Parameter Best Practices
+
+- Use clear, descriptive parameter names
+- Write helpful descriptions for each parameter  
+- Mark required vs optional parameters correctly
+- Use `enum` for parameters with a fixed set of values
+- Use examples in descriptions when helpful
+
+## Key Takeaways
+
+- Tools are defined as JSON schemas with name, description, and input_schema
+- Write detailed descriptions — Claude reads them to decide when to call
+- Required parameters must be in the `required` array

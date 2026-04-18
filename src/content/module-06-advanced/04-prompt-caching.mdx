@@ -1,0 +1,65 @@
+# Prompt Caching
+
+Prompt caching lets you cache the beginning of your prompt (system prompts, documents, examples) so they don't need to be re-processed on every API call. This cuts costs and latency dramatically for applications that reuse large contexts.
+
+## How It Works
+
+Mark parts of your prompt with a `cache_control` parameter. On the first call, Claude processes and caches that content. On subsequent calls, it reuses the cached version — saving processing time and cost.
+
+## Basic Usage
+
+```python
+import anthropic
+
+client = anthropic.Anthropic()
+
+response = client.messages.create(
+    model="claude-opus-4-5",
+    max_tokens=1024,
+    system=[
+        {
+            "type": "text",
+            "text": "You are an expert on the following 100-page technical document:",
+        },
+        {
+            "type": "text",
+            "text": very_long_document_text,  # could be 100K+ tokens
+            "cache_control": {"type": "ephemeral"}  # cache this!
+        }
+    ],
+    messages=[{"role": "user", "content": "What does section 4.2 say about timeouts?"}]
+)
+
+# Check cache usage
+print(f"Cache read tokens: {response.usage.cache_read_input_tokens}")
+print(f"Cache write tokens: {response.usage.cache_creation_input_tokens}")
+```
+
+## When to Cache
+
+| Content | Cache? |
+|---|---|
+| System prompts with large context | Yes |
+| Long static documents (PDFs, codebases) | Yes |
+| Few-shot examples that don't change | Yes |
+| User messages (change every turn) | No |
+| Short system prompts | Not worth it |
+
+## Cost Savings
+
+Cache hits are significantly cheaper than full token processing:
+- Cache write: ~25% more expensive than normal (one-time cost)
+- Cache hit: ~90% cheaper than re-processing
+
+For applications with a large, reused context, caching can reduce costs by 80-90%.
+
+## Cache Expiry
+
+Cached content expires after **5 minutes** of inactivity. If your app makes requests more frequently than that, the cache stays warm.
+
+## Key Takeaways
+
+- Prompt caching saves cost and latency for reused large contexts
+- Add `"cache_control": {"type": "ephemeral"}` to content you want cached
+- Cache hits are ~90% cheaper than re-processing the same tokens
+- Ideal for large system prompts, documents, and static examples

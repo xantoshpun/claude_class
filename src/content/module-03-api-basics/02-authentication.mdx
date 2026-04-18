@@ -1,0 +1,76 @@
+# Authentication & API Keys
+
+Before you can use the Claude API, you need an API key. This lesson covers how to get one, use it securely, and follow best practices.
+
+## Getting Your API Key
+
+1. Go to [console.anthropic.com](https://console.anthropic.com)
+2. Sign up or log in to your account
+3. Navigate to **API Keys** in the sidebar
+4. Click **Create Key**
+5. Give it a descriptive name (e.g., "My App - Production")
+6. Copy the key immediately — you cannot view it again
+
+## Using Your API Key
+
+### In HTTP requests
+```bash
+curl https://api.anthropic.com/v1/messages \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -H "content-type: application/json" \
+  -d '{"model": "claude-opus-4-5", "max_tokens": 100, "messages": [{"role": "user", "content": "Hello"}]}'
+```
+
+### In Python SDK
+```python
+import anthropic
+
+client = anthropic.Anthropic(api_key="YOUR_API_KEY")
+# or set ANTHROPIC_API_KEY env variable and omit api_key
+```
+
+### In TypeScript SDK
+```typescript
+import Anthropic from '@anthropic-ai/sdk'
+
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+```
+
+## Security Best Practices
+
+### Never hardcode API keys
+```python
+# ❌ Wrong — never do this
+client = anthropic.Anthropic(api_key="sk-ant-abc123...")
+
+# ✅ Correct — use environment variables
+import os
+client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+```
+
+### Use `.env` files locally
+```bash
+# .env file (add to .gitignore!)
+ANTHROPIC_API_KEY=sk-ant-your-key-here
+```
+
+### Never expose keys client-side
+If you're building a web app, **always call the Anthropic API from your server**, not from browser JavaScript. A client-side API key can be stolen and abused.
+
+### Rotate keys regularly
+Create a new key, update your environment, then delete the old key.
+
+## Key Management Tips
+
+- Use **separate keys** for development, staging, and production
+- Set **spending limits** in the Anthropic console
+- **Monitor usage** for unexpected spikes that might indicate a leak
+- **Name your keys** descriptively so you know where each is used
+
+## Key Takeaways
+
+- Get your API key from console.anthropic.com
+- Always store keys in environment variables, never in code
+- Never expose API keys in client-side code
+- Use separate keys for different environments
