@@ -1,0 +1,89 @@
+# The Messages API
+
+The Messages API is the core of Claude. Every interaction — from a simple question to a multi-turn conversation — goes through this single endpoint.
+
+## Basic Request Structure
+
+```python
+import anthropic
+
+client = anthropic.Anthropic()
+
+message = client.messages.create(
+    model="claude-opus-4-5",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "Explain recursion in one paragraph."}
+    ]
+)
+
+print(message.content[0].text)
+```
+
+## Request Parameters
+
+| Parameter | Required | Description |
+|---|---|---|
+| `model` | Yes | Which Claude model to use |
+| `messages` | Yes | Array of conversation turns |
+| `max_tokens` | Yes | Maximum tokens to generate |
+| `system` | No | System prompt (sets Claude's behavior) |
+| `temperature` | No | Randomness (0-1, default 1) |
+| `top_p` | No | Nucleus sampling |
+| `stop_sequences` | No | Strings that stop generation |
+| `stream` | No | Enable streaming |
+
+## The Messages Array
+
+Messages alternate between `user` and `assistant` roles:
+
+```python
+messages = [
+    {"role": "user", "content": "What is 2+2?"},
+    {"role": "assistant", "content": "2+2 equals 4."},
+    {"role": "user", "content": "What about 3+3?"},
+]
+```
+
+This creates multi-turn conversation context — Claude can refer back to earlier messages.
+
+## System Prompts
+
+Use a system prompt to configure Claude's behavior:
+
+```python
+message = client.messages.create(
+    model="claude-opus-4-5",
+    max_tokens=1024,
+    system="You are a helpful Python tutor. Always explain concepts with code examples.",
+    messages=[
+        {"role": "user", "content": "What is a list comprehension?"}
+    ]
+)
+```
+
+## Understanding Token Usage
+
+The response includes token counts:
+
+```python
+print(f"Input tokens: {message.usage.input_tokens}")
+print(f"Output tokens: {message.usage.output_tokens}")
+```
+
+Tokens are roughly 4 characters of English text. Monitoring usage helps control costs.
+
+## Stop Reasons
+
+| Stop Reason | Meaning |
+|---|---|
+| `end_turn` | Claude finished naturally |
+| `max_tokens` | Hit the `max_tokens` limit |
+| `stop_sequence` | Hit a custom stop sequence |
+
+## Key Takeaways
+
+- The Messages API takes a model, max_tokens, and messages array
+- Alternate user/assistant turns to build multi-turn conversations
+- Use system prompts to customize Claude's behavior
+- Monitor token usage to track costs

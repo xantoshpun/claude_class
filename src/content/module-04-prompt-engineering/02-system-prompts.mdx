@@ -1,0 +1,88 @@
+# System Prompts
+
+A system prompt is a special instruction that runs before the conversation starts. It sets the stage for every response Claude gives — defining its persona, constraints, and behavior for the entire session.
+
+## What System Prompts Do
+
+- **Define a persona** — "You are a friendly customer support agent"
+- **Set constraints** — "Only answer questions about cooking"
+- **Control format** — "Always respond in JSON"
+- **Establish tone** — "Be concise, professional, and avoid jargon"
+- **Provide context** — "This is a medical information service. Always recommend consulting a doctor"
+
+## How to Use System Prompts
+
+```python
+import anthropic
+
+client = anthropic.Anthropic()
+
+message = client.messages.create(
+    model="claude-opus-4-5",
+    max_tokens=1024,
+    system="""You are a senior Python engineer who teaches best practices.
+When reviewing code:
+1. Point out security issues first
+2. Then suggest performance improvements
+3. Finally, mention style improvements
+Always provide corrected code examples.""",
+    messages=[
+        {"role": "user", "content": "Review this code: [paste code]"}
+    ]
+)
+```
+
+## System Prompt Patterns
+
+### Persona Pattern
+```
+You are [name], a [role] at [company].
+Your communication style is [style].
+Your expertise is in [domain].
+```
+
+### Guardrail Pattern
+```
+You ONLY answer questions about [topic].
+If asked about anything else, politely redirect to [topic].
+Never provide [prohibited content].
+```
+
+### Format Pattern
+```
+Always respond in the following JSON format:
+{
+  "answer": "your answer here",
+  "confidence": "high/medium/low",
+  "sources": ["source1", "source2"]
+}
+```
+
+### Chain of Thought Pattern
+```
+Before answering, think through the problem step by step.
+Show your reasoning inside <thinking> tags.
+Then provide your final answer outside the tags.
+```
+
+## Best Practices
+
+1. **Be explicit** — Claude follows instructions literally; don't assume it will infer intent
+2. **Use structure** — Numbered lists and clear sections make instructions easier to follow
+3. **Test edge cases** — What happens when users ask off-topic questions?
+4. **Keep it focused** — Long, sprawling system prompts with contradictions will confuse Claude
+
+## System vs User Prompts
+
+| | System Prompt | User Message |
+|---|---|---|
+| Timing | Before conversation | Each turn |
+| Persistence | Applies to whole session | Single turn |
+| Purpose | Behavior, persona, rules | Actual task |
+| Visibility | Often hidden from end users | Visible to users |
+
+## Key Takeaways
+
+- System prompts define Claude's behavior for the entire conversation
+- Use them for personas, constraints, output formats, and context
+- Be explicit — Claude follows what you write, not what you mean

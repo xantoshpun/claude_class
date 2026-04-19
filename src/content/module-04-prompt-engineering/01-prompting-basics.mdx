@@ -1,0 +1,63 @@
+# Prompting Basics
+
+A prompt is the instruction you give to Claude. The quality of your prompt directly determines the quality of Claude's response. This lesson covers the fundamental principles of effective prompting.
+
+## The Golden Rule
+
+**Be specific.** Vague prompts produce vague responses. The more context and constraints you provide, the more useful Claude's output will be.
+
+## Anatomy of a Good Prompt
+
+A well-structured prompt typically includes:
+
+1. **Role** — Who should Claude be? (optional but powerful)
+2. **Task** — What should Claude do?
+3. **Context** — What background information is relevant?
+4. **Format** — How should the output be structured?
+5. **Constraints** — What should Claude avoid?
+
+### Example: Weak vs Strong Prompt
+
+❌ **Weak:**
+```
+Write about machine learning.
+```
+
+✅ **Strong:**
+```
+You are a senior ML engineer explaining concepts to junior developers.
+Write a 300-word introduction to supervised learning that:
+- Uses a real-world analogy (not spam detection)
+- Includes a concrete example with made-up but realistic data
+- Avoids jargon without defining it first
+- Ends with the key takeaway in bold
+```
+
+## Core Principles
+
+### 1. One Task at a Time
+Don't ask Claude to do 10 things in one prompt. Break complex requests into steps.
+
+### 2. Provide Examples
+"Do it like this: [example]" is often more effective than lengthy instructions.
+
+### 3. Specify Output Format
+Tell Claude exactly how to structure the response: bullet points, numbered lists, JSON, markdown, plain text.
+
+### 4. Iterate
+Treat prompting as a conversation. If the first result isn't right, refine your prompt.
+
+## Common Mistakes
+
+| Mistake | Better Approach |
+|---|---|
+| "Write something good" | Specify what "good" means for your context |
+| Overloading one prompt | Break into multiple focused prompts |
+| No output format | Specify: "Return as a JSON object" |
+| No length guidance | Specify: "In 3 bullet points" or "Under 200 words" |
+
+## Key Takeaways
+
+- Specific prompts produce specific, useful outputs
+- Include role, task, context, format, and constraints
+- Iterate — prompting is a skill that improves with practice

@@ -1,0 +1,84 @@
+# Error Handling
+
+Robust error handling is the difference between a brittle prototype and a production-ready application. The Anthropic API has well-defined error types — here's how to handle each.
+
+## Error Types
+
+| Error | HTTP Code | Cause | Solution |
+|---|---|---|---|
+| `AuthenticationError` | 401 | Invalid API key | Check and rotate key |
+| `PermissionDeniedError` | 403 | No access to resource | Check account permissions |
+| `NotFoundError` | 404 | Invalid model/resource | Check model name |
+| `RateLimitError` | 429 | Too many requests | Exponential backoff |
+| `APIStatusError` | 500+ | Server error | Retry with backoff |
+| `APIConnectionError` | N/A | Network failure | Retry connection |
+
+## Python Error Handling
+
+```python
+import anthropic
+import time
+
+client = anthropic.Anthropic()
+
+def safe_message(messages, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            return client.messages.create(
+                model="claude-sonnet-4-6",
+                max_tokens=1024,
+                messages=messages
+            )
+        except anthropic.AuthenticationError:
+            raise  # Don't retry auth errors
+        except anthropic.RateLimitError:
+            if attempt < max_retries - 1:
+                time.sleep(2 ** attempt)
+                continue
+            raise
+        except (anthropic.APIConnectionError, anthropic.APIStatusError) as e:
+            if attempt < max_retries - 1:
+                time.sleep(2 ** attempt)
+                continue
+            raise
+```
+
+## TypeScript Error Handling
+
+```typescript
+import Anthropic from '@anthropic-ai/sdk'
+
+const client = new Anthropic()
+
+async function safeMessage(content: string) {
+  try {
+    return await client.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1024,
+      messages: [{ role: 'user', content }],
+    })
+  } catch (error) {
+    if (error instanceof Anthropic.AuthenticationError) {
+      throw new Error('Invalid API key')
+    }
+    if (error instanceof Anthropic.RateLimitError) {
+      // Implement retry logic
+    }
+    throw error
+  }
+}
+```
+
+## Designing for Failure
+
+1. **Never crash silently** — Log all API errors with context
+2. **Show users meaningful errors** — "Service temporarily unavailable" not "429 Too Many Requests"
+3. **Implement circuit breakers** — Stop calling a failing API temporarily
+4. **Have fallbacks** — Cached responses, simplified behavior, graceful degradation
+
+## Key Takeaways
+
+- Each error type requires a different response — auth errors don't need retry
+- Always implement exponential backoff for rate limits and server errors
+- Show users friendly messages, not raw API errors
+- Log errors with enough context to debug production issues

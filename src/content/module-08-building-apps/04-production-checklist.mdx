@@ -1,0 +1,60 @@
+# Production Checklist
+
+Before you ship a Claude-powered application, work through this checklist to ensure it's reliable, safe, and cost-efficient.
+
+## Security ✅
+
+- [ ] API key is stored in environment variables, never in code
+- [ ] API calls proxied through server (never client-side)
+- [ ] User inputs validated and sanitized before sending to Claude
+- [ ] Rate limiting implemented on your endpoints
+- [ ] Auth required for endpoints that call the Anthropic API
+
+## Reliability ✅
+
+- [ ] Error handling for all Anthropic error types
+- [ ] Exponential backoff implemented for rate limit / server errors
+- [ ] Timeout configured (don't wait forever)
+- [ ] Graceful degradation when API is unavailable
+- [ ] Logging all errors with enough context to debug
+
+## Cost Control ✅
+
+- [ ] Using the right model for each task (Haiku for simple, Opus for complex)
+- [ ] System prompts are concise
+- [ ] Prompt caching used where applicable
+- [ ] Conversation history truncated to reasonable length
+- [ ] Max tokens set appropriately for each use case
+- [ ] Spending alerts configured in Anthropic Console
+
+## Safety & Compliance ✅
+
+- [ ] Reviewed Anthropic's Usage Policy for your use case
+- [ ] Users informed they're interacting with AI
+- [ ] Not using Claude to deceive users
+- [ ] Sensitive domains (health, legal, finance) have appropriate disclaimers
+- [ ] Content moderation layer if user-generated content is sent to Claude
+
+## Performance ✅
+
+- [ ] Streaming implemented for long responses
+- [ ] Appropriate models chosen for latency requirements
+- [ ] Batch API used for offline/non-real-time workloads
+
+## Observability ✅
+
+- [ ] Token usage logged per request
+- [ ] Response latency tracked
+- [ ] Error rates monitored
+- [ ] Costs tracked per feature/user
+
+## Launch
+
+Once all boxes are checked — ship it! 🚀
+
+## Key Takeaways
+
+- Security first: never expose API keys to clients
+- Build for reliability with proper error handling and retries
+- Monitor costs from day one — surprises are expensive
+- Stay compliant with Anthropic's usage policies

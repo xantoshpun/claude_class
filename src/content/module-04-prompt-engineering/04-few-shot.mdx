@@ -1,0 +1,90 @@
+# Few-Shot Prompting
+
+Few-shot prompting means providing Claude with 2-5 examples of the task before asking it to do the actual task. Instead of explaining what you want in words, you show it.
+
+## Why Few-Shot Works
+
+Examples often communicate intent more precisely than instructions. Instead of writing a complex spec, you demonstrate:
+- The exact input format
+- The exact output format  
+- The tone and style
+- Edge case handling
+
+## Basic Structure
+
+```
+Here are some examples:
+
+Input: [example input 1]
+Output: [example output 1]
+
+Input: [example input 2]
+Output: [example output 2]
+
+Now do this:
+Input: [actual input]
+Output:
+```
+
+## Example: Sentiment Classification
+
+```
+Classify the sentiment of these customer reviews.
+
+Review: "Absolutely love this product! Works perfectly."
+Sentiment: Positive
+
+Review: "Delivered late and packaging was damaged."
+Sentiment: Negative
+
+Review: "It's okay, does what it says but nothing special."
+Sentiment: Neutral
+
+Review: "Game changer for my workflow. Saves me hours every week!"
+Sentiment:
+```
+
+## Example: Data Extraction
+
+```
+Extract the key information from these job postings.
+
+Posting: "Senior Backend Engineer at Acme Corp. 5+ years Python required. Remote, $150-180k."
+Extracted: {"title": "Senior Backend Engineer", "company": "Acme Corp", "years": 5, "skills": ["Python"], "location": "Remote", "salary": "150-180k"}
+
+Posting: "Junior Data Analyst at DataCo. SQL and Excel required. Hybrid NYC. $65-75k."
+Extracted: {"title": "Junior Data Analyst", "company": "DataCo", "years": 0, "skills": ["SQL", "Excel"], "location": "Hybrid NYC", "salary": "65-75k"}
+
+Posting: "Principal ML Engineer at StartupX. 8+ years, TensorFlow/PyTorch. San Francisco. $200-250k + equity."
+Extracted:
+```
+
+## Choosing Good Examples
+
+1. **Diverse** — Cover different types within the task
+2. **Representative** — Match the distribution of real inputs
+3. **Consistent** — Use the same format every time
+4. **Correct** — Wrong examples teach wrong behavior
+
+## How Many Examples?
+
+| Examples | When to Use |
+|---|---|
+| 1-2 | Simple, clear tasks |
+| 3-5 | Complex tasks, nuanced outputs |
+| 6+ | Rarely needed; consider fine-tuning instead |
+
+## Zero-Shot vs Few-Shot
+
+| Zero-Shot | Few-Shot |
+|---|---|
+| Only instructions | Instructions + examples |
+| Good for common tasks | Better for specific formats |
+| Shorter prompts | Longer prompts (uses more tokens) |
+| Lower token cost | Higher token cost |
+
+## Key Takeaways
+
+- Few-shot prompting uses 2-5 examples to demonstrate the task
+- Often more effective than long written instructions
+- Examples should be diverse, representative, and correctly formatted

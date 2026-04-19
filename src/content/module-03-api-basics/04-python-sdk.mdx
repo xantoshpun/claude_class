@@ -1,0 +1,91 @@
+# Python SDK
+
+The official Anthropic Python SDK makes it easy to use Claude in Python applications. It handles authentication, retries, streaming, and type safety automatically.
+
+## Installation
+
+```bash
+pip install anthropic
+```
+
+## Basic Usage
+
+```python
+import anthropic
+
+client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from env
+
+message = client.messages.create(
+    model="claude-opus-4-5",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Hello, Claude!"}]
+)
+
+print(message.content[0].text)
+```
+
+## Async Support
+
+```python
+import asyncio
+import anthropic
+
+async def main():
+    client = anthropic.AsyncAnthropic()
+    message = await client.messages.create(
+        model="claude-opus-4-5",
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+    print(message.content[0].text)
+
+asyncio.run(main())
+```
+
+## Streaming
+
+```python
+with client.messages.stream(
+    model="claude-opus-4-5",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Write a short poem."}]
+) as stream:
+    for text in stream.text_stream:
+        print(text, end="", flush=True)
+```
+
+## Error Handling
+
+```python
+import anthropic
+
+client = anthropic.Anthropic()
+
+try:
+    message = client.messages.create(
+        model="claude-opus-4-5",
+        max_tokens=1024,
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+except anthropic.APIConnectionError:
+    print("Network error — check your connection")
+except anthropic.RateLimitError:
+    print("Rate limit hit — slow down requests")
+except anthropic.APIStatusError as e:
+    print(f"API error {e.status_code}: {e.message}")
+```
+
+## Automatic Retries
+
+The SDK automatically retries on transient errors (network issues, rate limits) with exponential backoff. You can configure this:
+
+```python
+client = anthropic.Anthropic(max_retries=3)
+```
+
+## Key Takeaways
+
+- Install with `pip install anthropic`
+- Supports sync and async usage
+- Streaming is built-in with `client.messages.stream()`
+- Automatic retry logic handles transient errors

@@ -1,0 +1,56 @@
+# Safety Guidelines
+
+Claude is built with safety at its core, but building safe applications requires understanding how Claude's safety features work and how to complement them in your own systems.
+
+## Constitutional AI
+
+Anthropic trains Claude using **Constitutional AI (CAI)** — a method where Claude learns to critique and revise its own outputs based on a set of principles. This creates safety behaviors that are more robust than simple content filters.
+
+## What Claude Won't Do
+
+Claude will decline requests to:
+- Generate content that could cause serious harm
+- Help with clearly illegal activities
+- Produce CSAM or similar harmful content
+- Deceive or manipulate users against their interests
+
+## Designing Safe Applications
+
+### 1. Use System Prompts for Guardrails
+```
+You are a customer support agent for Acme Software.
+- Only answer questions about our products
+- Never discuss competitors
+- If asked about harmful topics, redirect to support@acme.com
+```
+
+### 2. Validate and Sanitize Inputs
+Don't pass raw user input directly to Claude without validation. Check for:
+- Prompt injection attempts
+- Unexpectedly large inputs
+- Malicious content patterns
+
+### 3. Review Outputs for Sensitive Contexts
+In healthcare, legal, or financial applications, add a review layer on top of Claude's responses.
+
+### 4. Be Transparent with Users
+Tell users they're interacting with an AI. Don't use Claude to deceive users about the nature of the system.
+
+## Anthropic's Usage Policies
+
+Review the [Anthropic Usage Policy](https://www.anthropic.com/legal/aup) to understand what uses are permitted. Key points:
+- No weapons of mass destruction assistance
+- No content that sexualizes minors
+- No large-scale deception or manipulation
+- No undermining AI oversight mechanisms
+
+## Reporting Issues
+
+If you discover Claude producing clearly harmful outputs, report via Anthropic's responsible disclosure process.
+
+## Key Takeaways
+
+- Claude's safety comes from Constitutional AI training, not simple filters
+- Complement Claude's safety with application-level guardrails
+- Be transparent with users about AI involvement
+- Comply with Anthropic's usage policies

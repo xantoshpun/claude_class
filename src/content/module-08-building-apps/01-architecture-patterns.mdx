@@ -1,0 +1,74 @@
+# Architecture Patterns for Claude Apps
+
+Building reliable, scalable applications with Claude requires choosing the right architecture. Here are the most common and proven patterns.
+
+## Pattern 1: Simple API Proxy
+
+The simplest pattern: your server proxies requests to Claude, keeping the API key server-side.
+
+```
+Browser → Your API Route → Anthropic API → Browser
+```
+
+Use when: basic Q&A, chatbots, simple generation tasks.
+
+## Pattern 2: Context-Augmented Generation
+
+Fetch relevant context before calling Claude:
+
+```
+User Query → Retrieve Context (DB/vector store) → Claude (query + context) → Response
+```
+
+Use when: you need Claude to answer questions about your data.
+
+## Pattern 3: Structured Output Extraction
+
+Use Claude to extract structured data from unstructured content:
+
+```python
+response = client.messages.create(
+    model="claude-sonnet-4-6",
+    max_tokens=1024,
+    system="Extract data and return only valid JSON. No explanations.",
+    messages=[{
+        "role": "user",
+        "content": f"Extract: name, email, company from: {raw_text}"
+    }]
+)
+# Parse response.content[0].text as JSON
+```
+
+## Pattern 4: Multi-Step Pipeline
+
+Chain multiple Claude calls for complex tasks:
+
+```
+Input → Step 1: Extract → Step 2: Analyze → Step 3: Generate → Output
+```
+
+Each step is a focused prompt; outputs feed into the next step.
+
+## Pattern 5: Human-in-the-Loop
+
+For high-stakes decisions, route Claude's output through human review:
+
+```
+Claude Output → Confidence Check → Low confidence? → Human Review → Approve/Reject
+```
+
+## Choosing Your Pattern
+
+| Application | Pattern |
+|---|---|
+| Chatbot | Simple API Proxy |
+| Document Q&A | Context-Augmented |
+| Data extraction | Structured Output |
+| Content pipeline | Multi-Step Pipeline |
+| Medical/legal AI | Human-in-the-Loop |
+
+## Key Takeaways
+
+- Always proxy Anthropic API calls through your server
+- Match the pattern to your use case's complexity
+- Combine patterns for sophisticated applications

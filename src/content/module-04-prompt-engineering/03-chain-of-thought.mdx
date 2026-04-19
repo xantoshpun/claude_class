@@ -1,0 +1,92 @@
+# Chain of Thought Prompting
+
+Chain of Thought (CoT) prompting encourages Claude to reason through problems step by step before giving a final answer. This dramatically improves accuracy on complex reasoning, math, logic, and multi-step tasks.
+
+## Why It Works
+
+When Claude "thinks out loud," it:
+- Catches mistakes in its own reasoning
+- Breaks complex problems into manageable steps
+- Produces more accurate, verifiable answers
+- Makes its reasoning transparent and auditable
+
+## Basic Chain of Thought
+
+Simply ask Claude to show its work:
+
+```
+What is 17% of 342? Show your step-by-step calculation.
+```
+
+Or more generally:
+
+```
+Think through this problem step by step before giving your answer.
+```
+
+## The `<thinking>` Tag Pattern
+
+A powerful technique is to ask Claude to separate reasoning from the final answer:
+
+```
+Analyze this contract clause. 
+First, write your analysis inside <thinking> tags.
+Then provide your final recommendation outside the tags.
+
+Clause: "Licensor may terminate this agreement with 30 days notice 
+if Licensee fails to maintain a gross revenue of $10,000/month for 
+any two consecutive months."
+```
+
+Claude's output:
+```
+<thinking>
+This is a revenue-based termination clause. Let me analyze the key elements:
+1. Termination trigger: gross revenue below $10,000/month
+2. Duration requirement: two consecutive months (not just one)
+3. Notice period: 30 days — licensor must give advance warning
+4. Potential risks for the licensee...
+</thinking>
+
+This clause creates significant risk for the licensee. The revenue threshold of $10,000/month could be challenging for early-stage businesses...
+```
+
+## Zero-Shot vs Few-Shot CoT
+
+### Zero-Shot CoT
+Just add "Let's think step by step":
+```
+If a train travels 120 miles in 2 hours, then slows down and covers 
+90 miles in 3 hours, what is its average speed for the whole journey?
+Let's think step by step.
+```
+
+### Few-Shot CoT
+Provide examples of the reasoning pattern:
+```
+Q: There are 5 birds and 3 cats. How many legs total?
+A: Birds have 2 legs each: 5 × 2 = 10. Cats have 4 legs each: 3 × 4 = 12. Total: 10 + 12 = 22 legs.
+
+Q: There are 4 spiders and 2 dogs. How many legs total?
+A: [Claude follows the same pattern]
+```
+
+## When to Use Chain of Thought
+
+| Use CoT | Skip CoT |
+|---|---|
+| Math problems | Simple factual lookups |
+| Logic puzzles | Short creative tasks |
+| Multi-step decisions | Straightforward summaries |
+| Code debugging | Casual conversation |
+| Legal/medical analysis | Quick classifications |
+
+## Extended Thinking
+
+Claude models also support a formal **Extended Thinking** mode (covered in Module 6) which gives Claude a dedicated reasoning space with higher token budgets for the most complex tasks.
+
+## Key Takeaways
+
+- Chain of Thought prompting improves accuracy on complex reasoning tasks
+- Use "think step by step" or `<thinking>` tags to trigger reasoning
+- Few-shot CoT is powerful when you can provide reasoning examples

@@ -1,0 +1,104 @@
+# TypeScript SDK
+
+The official Anthropic TypeScript/Node.js SDK brings full type safety and modern async patterns to Claude integration.
+
+## Installation
+
+```bash
+npm install @anthropic-ai/sdk
+# or
+yarn add @anthropic-ai/sdk
+```
+
+## Basic Usage
+
+```typescript
+import Anthropic from '@anthropic-ai/sdk'
+
+const client = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+})
+
+const message = await client.messages.create({
+  model: 'claude-opus-4-5',
+  max_tokens: 1024,
+  messages: [{ role: 'user', content: 'Hello, Claude!' }],
+})
+
+console.log(message.content[0].type === 'text' ? message.content[0].text : '')
+```
+
+## Streaming
+
+```typescript
+const stream = await client.messages.stream({
+  model: 'claude-opus-4-5',
+  max_tokens: 1024,
+  messages: [{ role: 'user', content: 'Write a haiku about TypeScript.' }],
+})
+
+for await (const chunk of stream) {
+  if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
+    process.stdout.write(chunk.delta.text)
+  }
+}
+```
+
+## Using in Next.js API Routes
+
+```typescript
+// app/api/chat/route.ts
+import Anthropic from '@anthropic-ai/sdk'
+import { NextRequest } from 'next/server'
+
+const client = new Anthropic()
+
+export async function POST(req: NextRequest) {
+  const { message } = await req.json()
+
+  const response = await client.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: message }],
+  })
+
+  const text = response.content[0].type === 'text' ? response.content[0].text : ''
+  return Response.json({ response: text })
+}
+```
+
+## Streaming with ReadableStream (Next.js)
+
+```typescript
+export async function POST(req: NextRequest) {
+  const { message } = await req.json()
+
+  const stream = client.messages.stream({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: message }],
+  })
+
+  const readable = new ReadableStream({
+    async start(controller) {
+      for await (const chunk of stream) {
+        if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
+          controller.enqueue(new TextEncoder().encode(chunk.delta.text))
+        }
+      }
+      controller.close()
+    },
+  })
+
+  return new Response(readable, {
+    headers: { 'Content-Type': 'text/event-stream' },
+  })
+}
+```
+
+## Key Takeaways
+
+- Install with `npm install @anthropic-ai/sdk`
+- Full TypeScript types for all request/response shapes
+- Streaming works naturally with `for await...of`
+- Integrate with Next.js API routes for server-side usage

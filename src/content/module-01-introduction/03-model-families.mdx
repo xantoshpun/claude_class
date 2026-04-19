@@ -1,0 +1,68 @@
+# Claude Model Families
+
+Anthropic releases Claude in multiple tiers, each optimized for a different balance of capability, speed, and cost. Understanding the model families helps you pick the right one for each task.
+
+## The Three Tiers
+
+### 🧠 Claude Opus — The Flagship
+The most intelligent model in the Claude family. Ideal for:
+- Complex reasoning and analysis
+- Long-form research and writing
+- Tasks where quality matters more than speed
+- Situations requiring nuanced judgment
+
+**Best for:** Mission-critical tasks, complex reasoning, deep research
+
+### ⚡ Claude Sonnet — The Balanced Choice
+The sweet spot between power and speed. Ideal for:
+- Production applications at scale
+- Coding tasks and technical work
+- Customer-facing AI features
+- Everyday professional use
+
+**Best for:** Production deployments, code generation, professional tasks
+
+### 🐦 Claude Haiku — The Fast & Efficient
+The fastest and most cost-efficient model. Ideal for:
+- High-volume applications
+- Real-time interactions
+- Simple classification or summarization tasks
+- Cost-sensitive deployments
+
+**Best for:** Real-time chat, batch processing, classification at scale
+
+## Model Naming Convention
+
+Claude models follow this naming pattern:
+
+```
+claude-[tier]-[version]-[date]
+```
+
+Examples:
+- `claude-opus-4-5`
+- `claude-sonnet-4-6`
+- `claude-haiku-4-5-20251001`
+
+## Choosing the Right Model
+
+| Use Case | Recommended Model |
+|---|---|
+| Complex research | Opus |
+| Production web app | Sonnet |
+| Real-time chat | Haiku |
+| Code generation | Sonnet |
+| Document summarization | Haiku or Sonnet |
+| Legal/medical analysis | Opus |
+
+## Cost Considerations
+
+- **Haiku** is typically 10-20x cheaper than Opus
+- **Sonnet** is 3-5x cheaper than Opus
+- Start with Sonnet for development, optimize later
+
+## Key Takeaways
+
+- Claude has three model tiers: Opus (powerful), Sonnet (balanced), Haiku (fast)
+- Match the model to the task's complexity and latency requirements
+- Cost scales with capability — Haiku is cheapest, Opus is most capable

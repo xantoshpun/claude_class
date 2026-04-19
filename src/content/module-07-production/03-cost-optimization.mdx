@@ -1,0 +1,61 @@
+# Cost Optimization
+
+API costs can add up quickly in production. Here are proven strategies to reduce costs without sacrificing quality.
+
+## Understand Token Costs
+
+Costs are based on input and output tokens:
+- Input tokens: everything you send (system prompt + conversation history + user message)
+- Output tokens: everything Claude generates
+
+Output tokens are typically 3-5x more expensive than input tokens.
+
+## Strategy 1: Use the Right Model
+
+| Task | Recommended Model | Cost vs Opus |
+|---|---|---|
+| Simple Q&A | Haiku | ~20x cheaper |
+| Coding, analysis | Sonnet | ~5x cheaper |
+| Complex reasoning | Opus | Baseline |
+
+Don't use Opus when Haiku will do.
+
+## Strategy 2: Optimize System Prompts
+
+Every system prompt token is charged on every request. Keep system prompts concise:
+
+❌ 2,000-token system prompt = 2,000 × (RPM) tokens/minute in extra costs  
+✅ 200-token system prompt = 10x savings
+
+## Strategy 3: Prompt Caching
+
+Cache large, static contexts (documents, long system prompts) to avoid reprocessing on every call. Cache hits are ~90% cheaper.
+
+## Strategy 4: Limit Max Tokens
+
+Set `max_tokens` to the minimum you need. If responses are rarely over 500 tokens, don't set max_tokens to 4096.
+
+## Strategy 5: Truncate Conversation History
+
+Don't send the entire chat history on every turn. Keep only the last N turns:
+
+```python
+MAX_HISTORY = 10  # keep last 10 turns
+messages = conversation_history[-MAX_HISTORY:]
+```
+
+## Strategy 6: Use the Batch API
+
+For offline processing (nightly jobs, batch analysis), the Batch API costs 50% less.
+
+## Monitoring Costs
+
+Track spending in the [Anthropic Console](https://console.anthropic.com). Set up spend alerts to avoid surprises.
+
+## Key Takeaways
+
+- Match model tier to task complexity
+- Keep system prompts concise
+- Use prompt caching for repeated large contexts
+- Truncate conversation history aggressively
+- Use Batch API for offline workloads

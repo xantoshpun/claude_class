@@ -1,0 +1,76 @@
+# Rate Limits & Quotas
+
+The Anthropic API has rate limits to ensure fair usage and system stability. Understanding them helps you build applications that handle limits gracefully.
+
+## Types of Limits
+
+### Requests Per Minute (RPM)
+How many API calls you can make per minute.
+
+### Tokens Per Minute (TPM)
+The total input + output tokens across all requests per minute.
+
+### Tokens Per Day (TPD)
+A daily cap on total token usage.
+
+## Checking Your Limits
+
+Limits appear in the response headers:
+```
+anthropic-ratelimit-requests-limit: 50
+anthropic-ratelimit-requests-remaining: 47
+anthropic-ratelimit-requests-reset: 2024-01-01T00:00:00Z
+anthropic-ratelimit-tokens-limit: 100000
+anthropic-ratelimit-tokens-remaining: 95000
+```
+
+## Handling Rate Limit Errors
+
+```python
+import anthropic
+import time
+
+client = anthropic.Anthropic()
+
+def call_with_retry(messages, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            return client.messages.create(
+                model="claude-opus-4-5",
+                max_tokens=1024,
+                messages=messages
+            )
+        except anthropic.RateLimitError as e:
+            if attempt == max_retries - 1:
+                raise
+            wait = 2 ** attempt  # exponential backoff
+            print(f"Rate limited. Waiting {wait}s...")
+            time.sleep(wait)
+```
+
+The SDK also handles retries automatically by default.
+
+## Strategies to Stay Within Limits
+
+| Strategy | Description |
+|---|---|
+| Queue requests | Process in batches with delays |
+| Use Haiku for high-volume tasks | Cheaper and higher limits |
+| Cache responses | Don't repeat identical requests |
+| Use Batch API | Process up to 100K requests with 50% discount |
+| Upgrade your tier | Anthropic offers higher limits for paying customers |
+
+## The Batch API
+
+For large offline workloads, use the Batch API:
+- Asynchronous processing
+- Up to 100,000 requests per batch
+- 50% lower cost than real-time API
+- Results available within 24 hours
+
+## Key Takeaways
+
+- Rate limits apply per minute and per day across requests and tokens
+- Implement exponential backoff for rate limit errors
+- Use Haiku for high-volume, simpler tasks
+- Use the Batch API for large offline workloads

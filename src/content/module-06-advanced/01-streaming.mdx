@@ -1,0 +1,79 @@
+# Streaming Responses
+
+Streaming lets you receive Claude's response token by token as it's generated, rather than waiting for the complete response. This dramatically improves perceived performance for users.
+
+## Why Stream?
+
+- **Better UX** — Users see text appearing immediately instead of a loading spinner
+- **Early termination** — Stop generation if you get what you need
+- **Long responses** — Don't timeout waiting for very long outputs
+
+## Python Streaming
+
+```python
+import anthropic
+
+client = anthropic.Anthropic()
+
+with client.messages.stream(
+    model="claude-opus-4-5",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Write a 500-word essay on AI safety."}]
+) as stream:
+    for text in stream.text_stream:
+        print(text, end="", flush=True)
+
+# Get final message after streaming
+final = stream.get_final_message()
+print(f"\n\nTotal tokens: {final.usage.input_tokens + final.usage.output_tokens}")
+```
+
+## TypeScript / Next.js Streaming
+
+```typescript
+// app/api/stream/route.ts
+import Anthropic from '@anthropic-ai/sdk'
+
+const client = new Anthropic()
+
+export async function POST(req: Request) {
+  const { message } = await req.json()
+  
+  const stream = client.messages.stream({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: message }],
+  })
+
+  const readable = new ReadableStream({
+    async start(controller) {
+      for await (const chunk of stream) {
+        if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
+          controller.enqueue(new TextEncoder().encode(chunk.delta.text))
+        }
+      }
+      controller.close()
+    },
+  })
+
+  return new Response(readable, {
+    headers: { 'Content-Type': 'text/event-stream' }
+  })
+}
+```
+
+## Stream Events
+
+| Event | Meaning |
+|---|---|
+| `message_start` | Metadata about the message |
+| `content_block_start` | A content block started |
+| `content_block_delta` | New text tokens |
+| `content_block_stop` | A block ended |
+| `message_stop` | Generation complete |
+
+## Key Takeaways
+
+- Streaming delivers tokens as they're generated for a better user experience
+- Use `client.messages.stream()` in both Python and TypeScript SDKs
+- Parse `content_block_delta` events to get the actual text tokens
